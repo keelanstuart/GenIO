@@ -5,6 +5,7 @@ to create data file formats that are both forwardly and backwardly compatible.
 
 To read, you might do something like:
 
+```
 ERRCODE BaseObject::Load(genio::IInputStream *is)
 {
 	if (is)
@@ -75,10 +76,11 @@ ERRCODE BaseObject::Load(genio::IInputStream *is)
 
 	return ERR_NULLSTREAM;
 }
-
+```
 
 To write a stream compatible with the above code, you might do this:
 
+```
 ERRCODE BaseObject::Save(IOutputStream *os, BOOL store_all_props)
 {
 	if (os)
@@ -124,8 +126,9 @@ ERRCODE BaseObject::Save(IOutputStream *os, BOOL store_all_props)
 
 	return ERR_NULLSTREAM;
 }
+```
 
-By using the above method, you can always add new data under different blocks and have them
+By using this  method, you can always add new data under different blocks and have them
 correctly processed - or appropriately ignored.
 
 It is also important to note that blocks can be nested and top-level chunks can be skipped over
