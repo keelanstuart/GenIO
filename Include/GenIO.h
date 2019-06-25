@@ -50,6 +50,16 @@ namespace genio
 
 	typedef uint32_t FOURCHARCODE;
 
+#if !defined(GENIO_EXPORTS)
+#if defined(UNICODE) || defined(_UNICODE)
+#define IParserT IParserW
+#define CM_TCHAR CM_UNICODE
+#else
+#define IParserT IParserA
+#define CM_TCHAR CM_ASCII
+#endif
+#endif
+
 	class IParser
 	{
 
@@ -70,8 +80,11 @@ namespace genio
 			TT_NUMTOKENTYPES
 		};
 
-		/// Sets the source data that will be parsed
-		virtual void SetSourceData(const TCHAR *data, size_t datalen) = NULL;
+		enum CHAR_MODE
+		{
+			CM_ASCII = 0,
+			CM_UNICODE
+		};
 
 		/// Consumes the next C-style token in the stream
 		virtual bool NextToken() = NULL;
@@ -87,19 +100,42 @@ namespace genio
 		/// Returns the current token type that has been parsed out of the stream
 		virtual TOKEN_TYPE GetCurrentTokenType() const = NULL;
 
-		/// Returns the actual string out of the stream for the currently parsed token
-		virtual const TCHAR *GetCurrentTokenString() const = NULL;
-
-		/// Returns true if the current token matches the given string, optionally
-		/// checking case
-		virtual bool IsToken(const TCHAR *s, bool case_sensitive = false) const = NULL;
-
 		virtual void Release() = NULL;
 
-		GENIO_API static IParser *Create();
+		/// Creates an IParser in the mode you desire, ASCII or Unicode. Specify CM_TCHAR to choose based on your program configuration
+		GENIO_API static IParser *Create(CHAR_MODE mode);
 
 	};
 
+	class IParserW : public IParser
+	{
+	public:
+		/// Sets the source data that will be parsed
+		virtual void SetSourceData(const wchar_t *data, size_t datalen) = NULL;
+
+		/// Returns the actual string out of the stream for the currently parsed token
+		virtual const wchar_t *GetCurrentTokenString() const = NULL;
+
+		/// Returns true if the current token matches the given string, optionally
+		/// checking case
+		virtual bool IsToken(const wchar_t *s, bool case_sensitive = false) const = NULL;
+
+	};
+
+	class IParserA : public IParser
+	{
+	public:
+		/// Sets the source data that will be parsed
+		virtual void SetSourceData(const char *data, size_t datalen) = NULL;
+
+		/// Returns the actual string out of the stream for the currently parsed token
+		virtual const char *GetCurrentTokenString() const = NULL;
+
+		/// Returns true if the current token matches the given string, optionally
+		/// checking case
+		virtual bool IsToken(const char *s, bool case_sensitive = false) const = NULL;
+
+	};
 
 	class ITextOutput
 	{
@@ -138,7 +174,10 @@ namespace genio
 		/// Indentation level decrease
 		virtual void DecIndent(size_t dec = 1) = NULL;
 
+		virtual void Release() = NULL;
+
 		GENIO_API static ITextOutput *Create(HANDLE h);
+		GENIO_API static ITextOutput *Create(const TCHAR *filename);
 	};
 
 

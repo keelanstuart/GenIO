@@ -37,7 +37,7 @@
 class CGenTextOutput : public genio::ITextOutput
 {
 public:
-	CGenTextOutput(FILE *f);
+	CGenTextOutput(FILE *f, bool owner);
 	virtual ~CGenTextOutput();
 
 	virtual void Flush();
@@ -66,6 +66,7 @@ public:
 	// Indentation level decrease
 	virtual void DecIndent(size_t dec = 1);
 
+	virtual void Release();
 
 protected:
 	size_t indentlvl;

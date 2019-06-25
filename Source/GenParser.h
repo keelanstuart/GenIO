@@ -33,45 +33,61 @@
 
 #pragma once
 
-class CGenParser
+class CGenParserA : public genio::IParserA
 {
 public:
-	CGenParser();
+	CGenParserA();
 
-	~CGenParser();
+	virtual ~CGenParserA();
 
-	enum TOKEN_TYPE
-	{
-		TT_NONE = 0,
+	virtual void SetSourceData(const char *data, size_t datalen);
 
-		TT_IDENT,			// [a-z,A-Z,_]+[0-9,a-z,A-Z,_]*
-		TT_STRING,			// ["'][...]*["']
-		TT_NUMBER,			// [-][0-9]+[.][0-9]*
-		TT_SYMBOL,			// [!@#$%^&*()`~-=+[]{}<>/?;':",.|\]
-		TT_HEXNUMBER,		// [0][xX][0-9,a-f,A-F]+
-		TT_SHORTCOMMENT,	// "//"[...]*[\n]
-		TT_LONGCOMMENT,		// "/*"[...]*"*/"
+	virtual bool NextToken();
+	virtual bool NextLine();
+	virtual bool ToEndOfLine(); // captures the data in the stream until the next detected EOL but does not move the current stream position
 
-		TT_NUMTOKENTYPES
-	};
+	virtual genio::IParser::TOKEN_TYPE GetCurrentTokenType() const;
+	virtual const char *GetCurrentTokenString() const;
 
-	void SetSourceData(const TCHAR *data, UINT datalen);
+	virtual bool IsToken(const char *s, bool case_sensitive = false) const;
 
-	bool NextToken();
-	bool NextLine();
-	bool ToEndOfLine(); // captures the data in the stream until the next detected EOL but does not move the current stream position
+	virtual void Release() { delete this; }
 
-	TOKEN_TYPE GetCurrentTokenType();
-	TCHAR *GetCurrentTokenString();
+protected:
+	char *m_data;
+	size_t m_datalen;
+	size_t m_pos;
 
-	bool IsToken(TCHAR *s, bool case_sensitive = false);
+	std::basic_string<char> m_curStr;
+	genio::IParser::TOKEN_TYPE m_curType;
+};
+
+class CGenParserW : public genio::IParserW
+{
+public:
+	CGenParserW();
+
+	~CGenParserW();
+
+	virtual void SetSourceData(const wchar_t *data, size_t datalen);
+
+	virtual bool NextToken();
+	virtual bool NextLine();
+	virtual bool ToEndOfLine(); // captures the data in the stream until the next detected EOL but does not move the current stream position
+
+	virtual genio::IParser::TOKEN_TYPE GetCurrentTokenType() const;
+	virtual const wchar_t *GetCurrentTokenString() const;
+
+	virtual bool IsToken(const wchar_t *s, bool case_sensitive = false) const;
+
+	virtual void Release() { delete this; }
 
 protected:
 	TCHAR *m_data;
-	UINT m_datalen;
-	UINT m_pos;
+	size_t m_datalen;
+	size_t m_pos;
 
-	tstring m_curStr;
-	TOKEN_TYPE m_curType;
+	std::basic_string<wchar_t> m_curStr;
+	genio::IParser::TOKEN_TYPE m_curType;
 };
 

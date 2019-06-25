@@ -42,17 +42,34 @@ genio::ITextOutput *genio::ITextOutput::Create(HANDLE h)
 	if (h)
 	{
 		int fd = _open_osfhandle((intptr_t)h, _O_TEXT);
-		f = _fdopen(fd, "tw");
+		f = _fdopen(fd, "w");
 	}
-	return (genio::ITextOutput *)(new CGenTextOutput(f));
+
+	return (genio::ITextOutput *)(new CGenTextOutput(f, false));
+}
+
+genio::ITextOutput *genio::ITextOutput::Create(const TCHAR *filename)
+{
+	FILE *f = nullptr;
+	_tfopen_s(&f, filename, _T("wt"));
+	if (!f)
+		return nullptr;
+
+	return (genio::ITextOutput *)(new CGenTextOutput(f, true));
+}
+
+void CGenTextOutput::Release()
+{
+	delete this;
 }
 
 // ************************************************************************
 // Text Output Stream Methods
 
-CGenTextOutput::CGenTextOutput(FILE *f)
+CGenTextOutput::CGenTextOutput(FILE *f, bool owner)
 {
 	m_f = f;
+	m_OwnsFile = owner;
 	indentchar = _T('\t');
 	indentlvl = 0;
 }
@@ -60,6 +77,11 @@ CGenTextOutput::CGenTextOutput(FILE *f)
 
 CGenTextOutput::~CGenTextOutput()
 {
+	if (m_OwnsFile)
+	{
+		fclose(m_f);
+		m_f = NULL;
+	}
 }
 
 
