@@ -44,7 +44,6 @@
     <ProjectGuid>{3E55E33C-4834-4D0A-A998-1A33A6B91B74}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>GenIO</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
