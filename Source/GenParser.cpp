@@ -43,6 +43,8 @@ CGenParserA::CGenParserA()
 	m_pos = 0;
 
 	m_curType = genio::IParser::TT_NONE;
+
+	m_flags = 0;
 }
 
 
@@ -78,6 +80,23 @@ bool CGenParserA::NextToken()
 		{
 			if (m_curType == genio::IParser::TT_NONE)
 			{
+				if (m_flags.IsSet(PARSEFLAG_TOKENIZE_NEWLINES))
+				{
+					bool nl = false;
+					while ((m_pos < m_datalen) && strchr("\n\r", m_data[m_pos]))
+					{
+						nl = true;
+						m_pos++;
+					}
+
+					if (nl)
+					{
+						m_curType = TT_NEWLINE;
+						m_curStr.clear();
+						return true;
+					}
+				}
+
 				// skip whitespace
 				m_pos++;
 			}
@@ -324,9 +343,9 @@ bool CGenParserA::NextLine()
 	return false;
 }
 
-bool CGenParserA::ToEndOfLine()
+bool CGenParserA::ReadUntil(const char *delimiter_set, bool end_ok, bool multiline)
 {
-	if (!m_data || !m_datalen)
+	if (!m_data || !m_datalen || !delimiter_set || (m_pos >= m_datalen))
 		return false;
 
 	m_curType = genio::IParser::TT_NONE;
@@ -335,16 +354,26 @@ bool CGenParserA::ToEndOfLine()
 	while (m_pos < m_datalen)
 	{
 		// skip over everything except EOLs
-		if (strchr("\n\r", m_data[m_pos]))
+		if (strchr(delimiter_set, m_data[m_pos]))
 		{
+			// advance past the delimiting character
+			m_pos++;
 			return true;
 		}
+
+		if (strchr("\n\r", m_data[m_pos]) && !multiline)
+			return false;
 
 		m_curStr += m_data[m_pos];
 		m_pos++;
 	}
 
-	return false;
+	return end_ok;
+}
+
+bool CGenParserA::ToEndOfLine()
+{
+	return ReadUntil("\n\r", true);
 }
 
 genio::IParser::TOKEN_TYPE CGenParserA::GetCurrentTokenType() const
@@ -373,6 +402,8 @@ CGenParserW::CGenParserW()
 	m_pos = 0;
 
 	m_curType = genio::IParser::TT_NONE;
+
+	m_flags = 0;
 }
 
 
@@ -408,6 +439,23 @@ bool CGenParserW::NextToken()
 		{
 			if (m_curType == genio::IParser::TT_NONE)
 			{
+				if (m_flags.IsSet(PARSEFLAG_TOKENIZE_NEWLINES))
+				{
+					bool nl = false;
+					while ((m_pos < m_datalen) && wcschr(L"\n\r", m_data[m_pos]))
+					{
+						nl = true;
+						m_pos++;
+					}
+
+					if (nl)
+					{
+						m_curType = TT_NEWLINE;
+						m_curStr.clear();
+						return true;
+					}
+				}
+
 				// skip whitespace
 				m_pos++;
 			}
@@ -654,9 +702,9 @@ bool CGenParserW::NextLine()
 	return false;
 }
 
-bool CGenParserW::ToEndOfLine()
+bool CGenParserW::ReadUntil(const wchar_t *delimiter_set, bool end_ok, bool multiline)
 {
-	if (!m_data || !m_datalen)
+	if (!m_data || !m_datalen || !delimiter_set || (m_pos >= m_datalen))
 		return false;
 
 	m_curType = genio::IParser::TT_NONE;
@@ -664,17 +712,27 @@ bool CGenParserW::ToEndOfLine()
 
 	while (m_pos < m_datalen)
 	{
-		// skip over everything except EOLs
-		if (wcschr(L"\n\r", m_data[m_pos]))
+		// skip over everything except delimiter characters
+		if (wcschr(delimiter_set, m_data[m_pos]))
 		{
+			// advance past the delimiting character
+			m_pos++;
 			return true;
 		}
+
+		if (wcschr(L"\n\r", m_data[m_pos]) && !multiline)
+			return false;
 
 		m_curStr += m_data[m_pos];
 		m_pos++;
 	}
 
-	return false;
+	return end_ok;
+}
+
+bool CGenParserW::ToEndOfLine()
+{
+	return ReadUntil(L"\n\r", true);
 }
 
 genio::IParser::TOKEN_TYPE CGenParserW::GetCurrentTokenType() const
