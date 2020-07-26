@@ -654,6 +654,10 @@ bool CGenParserW::NextToken()
 
 		if ((m_curType == genio::IParser::TT_STRING) || (m_curType == genio::IParser::TT_SHORTCOMMENT) || (m_curType == genio::IParser::TT_LONGCOMMENT))
 		{
+			// detect empty strings
+			if ((m_curType == genio::IParser::TT_STRING) && (m_data[m_pos] == strdelim))
+				continue;
+
 			m_curStr += m_data[m_pos];
 		}
 

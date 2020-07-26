@@ -32,11 +32,18 @@
 
 #pragma once
 
+#if !defined(GENIO_STATIC)
 
 #ifdef GENIO_EXPORTS
 #define GENIO_API __declspec(dllexport)
 #else
 #define GENIO_API __declspec(dllimport)
+#endif
+
+#else
+
+#define GENIO_API
+
 #endif
 
 
