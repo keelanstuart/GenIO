@@ -41,6 +41,7 @@ CGenParserA::CGenParserA()
 	m_data = nullptr;
 	m_datalen = 0;
 	m_pos = 0;
+	m_start = m_end = 0;
 
 	m_curType = genio::IParser::TT_NONE;
 
@@ -58,6 +59,7 @@ void CGenParserA::SetSourceData(const char *data, size_t datalen)
 	m_data = (char *)data;
 	m_datalen = datalen;
 	m_pos = 0;
+	m_start = m_end = 0;
 
 	m_curType = genio::IParser::TT_NONE;
 	m_curStr.clear();
@@ -72,6 +74,8 @@ bool CGenParserA::NextToken()
 	m_curType = genio::IParser::TT_NONE;
 	m_curStr.clear();
 	char strdelim = '\0';
+
+	m_start = m_pos;
 
 	while (m_pos < m_datalen)
 	{
@@ -301,6 +305,8 @@ bool CGenParserA::NextToken()
 		m_pos++;
 	}
 
+	m_end = std::max<size_t>(m_start, m_pos - 1);
+
 	if (m_curStr.empty())
 	{
 		return false;
@@ -348,8 +354,12 @@ bool CGenParserA::ReadUntil(const char *delimiter_set, bool end_ok, bool multili
 	if (!m_data || !m_datalen || !delimiter_set || (m_pos >= m_datalen))
 		return false;
 
+	bool ret = end_ok;
+
 	m_curType = genio::IParser::TT_NONE;
 	m_curStr.clear();
+
+	m_start = m_pos;
 
 	while (m_pos < m_datalen)
 	{
@@ -358,17 +368,23 @@ bool CGenParserA::ReadUntil(const char *delimiter_set, bool end_ok, bool multili
 		{
 			// advance past the delimiting character
 			m_pos++;
-			return true;
+			ret = true;
+			break;
 		}
 
 		if (strchr("\n\r", m_data[m_pos]) && !multiline)
-			return false;
+		{
+			ret = false;
+			break;
+		}
 
 		m_curStr += m_data[m_pos];
 		m_pos++;
 	}
 
-	return end_ok;
+	m_end = std::max<size_t>(m_start, m_pos - 1);
+
+	return ret;
 }
 
 bool CGenParserA::ToEndOfLine()
@@ -400,6 +416,7 @@ CGenParserW::CGenParserW()
 	m_data = nullptr;
 	m_datalen = 0;
 	m_pos = 0;
+	m_start = m_end = 0;
 
 	m_curType = genio::IParser::TT_NONE;
 
@@ -417,6 +434,7 @@ void CGenParserW::SetSourceData(const wchar_t *data, size_t datalen)
 	m_data = (wchar_t *)data;
 	m_datalen = datalen;
 	m_pos = 0;
+	m_start = m_end = 0;
 
 	m_curType = genio::IParser::TT_NONE;
 	m_curStr.clear();
@@ -428,9 +446,13 @@ bool CGenParserW::NextToken()
 	if (!m_data || !m_datalen)
 		return false;
 
+	bool ret = true;
+
 	m_curType = genio::IParser::TT_NONE;
 	m_curStr.clear();
 	wchar_t strdelim = L'\0';
+
+	m_start = m_pos;
 
 	while (m_pos < m_datalen)
 	{
@@ -452,7 +474,8 @@ bool CGenParserW::NextToken()
 					{
 						m_curType = TT_NEWLINE;
 						m_curStr.clear();
-						return true;
+						ret = true;
+						break;
 					}
 				}
 
@@ -664,12 +687,14 @@ bool CGenParserW::NextToken()
 		m_pos++;
 	}
 
+	m_end = std::max<size_t>(m_start, m_pos - 1);
+
 	if (m_curStr.empty())
 	{
-		return false;
+		ret = false;
 	}
 
-	return true;
+	return ret;
 }
 
 
@@ -711,8 +736,12 @@ bool CGenParserW::ReadUntil(const wchar_t *delimiter_set, bool end_ok, bool mult
 	if (!m_data || !m_datalen || !delimiter_set || (m_pos >= m_datalen))
 		return false;
 
+	bool ret = end_ok;
+
 	m_curType = genio::IParser::TT_NONE;
 	m_curStr.clear();
+
+	m_start = m_pos;
 
 	while (m_pos < m_datalen)
 	{
@@ -721,17 +750,23 @@ bool CGenParserW::ReadUntil(const wchar_t *delimiter_set, bool end_ok, bool mult
 		{
 			// advance past the delimiting character
 			m_pos++;
-			return true;
+			ret = true;
+			break;
 		}
 
 		if (wcschr(L"\n\r", m_data[m_pos]) && !multiline)
-			return false;
+		{
+			ret = false;
+			break;
+		}
 
 		m_curStr += m_data[m_pos];
 		m_pos++;
 	}
 
-	return end_ok;
+	m_end = std::max<size_t>(m_start, m_pos - 1);
+
+	return ret;
 }
 
 bool CGenParserW::ToEndOfLine()
@@ -744,6 +779,27 @@ genio::IParser::TOKEN_TYPE CGenParserW::GetCurrentTokenType() const
 	return m_curType;
 }
 
+bool CGenParserW::GetCurrentTokenRange(size_t &token_start, size_t &token_end) const
+{
+	if (m_curStr.empty())
+		return false;
+
+	token_start = m_start;
+	token_end = m_end;
+
+	return true;
+}
+
+bool CGenParserA::GetCurrentTokenRange(size_t&token_start, size_t &token_end) const
+{
+	if (m_curStr.empty())
+		return false;
+
+	token_start = m_start;
+	token_end = m_end;
+
+	return true;
+}
 
 const wchar_t *CGenParserW::GetCurrentTokenString() const
 {
@@ -773,4 +829,3 @@ genio::IParser *genio::IParser::Create(CHAR_MODE mode)
 
 	return nullptr;
 }
-

@@ -51,6 +51,7 @@ public:
 
 	virtual genio::IParser::TOKEN_TYPE GetCurrentTokenType() const;
 	virtual const char *GetCurrentTokenString() const;
+	virtual bool GetCurrentTokenRange(size_t &token_start, size_t &token_end) const;
 
 	virtual bool IsToken(const char *s, bool case_sensitive = false) const;
 
@@ -63,6 +64,7 @@ protected:
 	char *m_data;
 	size_t m_datalen;
 	size_t m_pos;
+	size_t m_start, m_end;
 
 	std::basic_string<char> m_curStr;
 	genio::IParser::TOKEN_TYPE m_curType;
@@ -86,6 +88,7 @@ public:
 
 	virtual genio::IParser::TOKEN_TYPE GetCurrentTokenType() const;
 	virtual const wchar_t *GetCurrentTokenString() const;
+	virtual bool GetCurrentTokenRange(size_t &token_start, size_t &token_end) const;
 
 	virtual bool IsToken(const wchar_t *s, bool case_sensitive = false) const;
 
@@ -95,9 +98,10 @@ public:
 	virtual uint64_t GetModeFlags() { return m_flags; }
 
 protected:
-	TCHAR *m_data;
+	wchar_t *m_data;
 	size_t m_datalen;
 	size_t m_pos;
+	size_t m_start, m_end;
 
 	std::basic_string<wchar_t> m_curStr;
 	genio::IParser::TOKEN_TYPE m_curType;

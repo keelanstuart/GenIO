@@ -32,6 +32,8 @@
 
 #pragma once
 
+// If you use the static library version of GenIO, you must define GENIO_STATIC in your project's preprocessor definitions
+
 #if !defined(GENIO_STATIC)
 
 #ifdef GENIO_EXPORTS
@@ -57,14 +59,12 @@ namespace genio
 
 	typedef uint32_t FOURCHARCODE;
 
-#if !defined(GENIO_EXPORTS)
 #if defined(UNICODE) || defined(_UNICODE)
 #define IParserT IParserW
 #define CM_TCHAR CM_UNICODE
 #else
 #define IParserT IParserA
 #define CM_TCHAR CM_ASCII
-#endif
 #endif
 
 	class IParser
@@ -108,6 +108,9 @@ namespace genio
 
 		/// Returns the current token type that has been parsed out of the stream
 		virtual TOKEN_TYPE GetCurrentTokenType() const = NULL;
+
+		/// When the return value is true, token_start and token_end contain the indices in the buffer for the current token
+		virtual bool GetCurrentTokenRange(size_t &token_start, size_t &token_end) const = NULL;
 
 		/// Returns the resources allocated by the parser to the system
 		virtual void Release() = NULL;
