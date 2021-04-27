@@ -72,7 +72,7 @@ namespace genio
 
 	public:
 
-		enum TOKEN_TYPE
+		typedef enum
 		{
 			TT_NONE = 0,
 
@@ -86,13 +86,13 @@ namespace genio
 			TT_NEWLINE,			/// [\n\r]+
 
 			TT_NUMTOKENTYPES
-		};
+		} TOKEN_TYPE;
 
-		enum CHAR_MODE
+		typedef enum
 		{
 			CM_ASCII = 0,
 			CM_UNICODE
-		};
+		} CHAR_MODE;
 
 #define PARSEFLAG_TOKENIZE_NEWLINES		0x0001
 
