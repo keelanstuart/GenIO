@@ -1,10 +1,11 @@
 /*
+
 	GenIO Library Source File
 
-	Copyright © 2009-2019, Keelan Stuart. All rights reserved.
+	Copyright © 2009-2021, Keelan Stuart. All rights reserved.
 
 	GenIO is an I/O library, providing classes that stream data in and out
-	in a way that forward- and backward-compatible de/serialization is easy.
+	in a way that makes forward- and backward-compatible de/serialization easy.
 	Additionally, text streams that support indentation and a C-syntax
 	tokenizing parser are provided.
 
@@ -28,6 +29,7 @@
 	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
+
 */
 
 #pragma once
