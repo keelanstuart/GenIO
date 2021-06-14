@@ -248,7 +248,7 @@ bool CGenParserA::NextToken()
 			break;
 		}
 
-		if (strchr("\"'", m_data[m_pos]) != nullptr)
+		if ((m_data[m_pos] == '\"') || ((m_data[m_pos] == '\'')))
 		{
 			if (m_curType == genio::IParser::TT_NONE)
 			{
