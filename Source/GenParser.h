@@ -33,6 +33,8 @@
 
 #pragma once
 
+#include <PowerProps.h>
+
 class CGenParserA : public genio::IParserA
 {
 public:
@@ -44,22 +46,30 @@ public:
 
 	virtual bool NextToken();
 	virtual bool NextLine();
-	virtual bool ToEndOfLine(); // captures the data in the stream until the next detected EOL but does not move the current stream position
+	virtual bool ReadUntil(const char *delimiter_set, bool end_ok = false, bool multiline = false);
+	virtual bool ToEndOfLine();
 
 	virtual genio::IParser::TOKEN_TYPE GetCurrentTokenType() const;
 	virtual const char *GetCurrentTokenString() const;
+	virtual bool GetCurrentTokenRange(size_t &token_start, size_t &token_end) const;
 
 	virtual bool IsToken(const char *s, bool case_sensitive = false) const;
 
 	virtual void Release() { delete this; }
 
+	virtual void SetModeFlags(uint64_t flags) { m_flags = flags; }
+	virtual uint64_t GetModeFlags() { return m_flags; }
+
 protected:
 	char *m_data;
 	size_t m_datalen;
 	size_t m_pos;
+	size_t m_start, m_end;
 
 	std::basic_string<char> m_curStr;
 	genio::IParser::TOKEN_TYPE m_curType;
+
+	props::TFlags64 m_flags;
 };
 
 class CGenParserW : public genio::IParserW
@@ -73,21 +83,29 @@ public:
 
 	virtual bool NextToken();
 	virtual bool NextLine();
-	virtual bool ToEndOfLine(); // captures the data in the stream until the next detected EOL but does not move the current stream position
+	virtual bool ReadUntil(const wchar_t *delimiter_set, bool end_ok = false, bool multiline = false);
+	virtual bool ToEndOfLine();
 
 	virtual genio::IParser::TOKEN_TYPE GetCurrentTokenType() const;
 	virtual const wchar_t *GetCurrentTokenString() const;
+	virtual bool GetCurrentTokenRange(size_t &token_start, size_t &token_end) const;
 
 	virtual bool IsToken(const wchar_t *s, bool case_sensitive = false) const;
 
 	virtual void Release() { delete this; }
 
+	virtual void SetModeFlags(uint64_t flags) { m_flags = flags; }
+	virtual uint64_t GetModeFlags() { return m_flags; }
+
 protected:
-	TCHAR *m_data;
+	wchar_t *m_data;
 	size_t m_datalen;
 	size_t m_pos;
+	size_t m_start, m_end;
 
 	std::basic_string<wchar_t> m_curStr;
 	genio::IParser::TOKEN_TYPE m_curType;
+
+	props::TFlags64 m_flags;
 };
 

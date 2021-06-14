@@ -1,10 +1,11 @@
 /*
+
 	GenIO Library Source File
 
-	Copyright © 2009-2019, Keelan Stuart. All rights reserved.
+	Copyright © 2009-2021, Keelan Stuart. All rights reserved.
 
 	GenIO is an I/O library, providing classes that stream data in and out
-	in a way that forward- and backward-compatible de/serialization is easy.
+	in a way that makes forward- and backward-compatible de/serialization easy.
 	Additionally, text streams that support indentation and a C-syntax
 	tokenizing parser are provided.
 
@@ -28,15 +29,25 @@
 	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
+
 */
 
 #pragma once
 
+// If you use the static library version of GenIO, you must define GENIO_STATIC in your project's preprocessor definitions
+
+#if !defined(GENIO_STATIC)
 
 #ifdef GENIO_EXPORTS
 #define GENIO_API __declspec(dllexport)
 #else
 #define GENIO_API __declspec(dllimport)
+#endif
+
+#else
+
+#define GENIO_API
+
 #endif
 
 
@@ -50,7 +61,6 @@ namespace genio
 
 	typedef uint32_t FOURCHARCODE;
 
-#if !defined(GENIO_EXPORTS)
 #if defined(UNICODE) || defined(_UNICODE)
 #define IParserT IParserW
 #define CM_TCHAR CM_UNICODE
@@ -58,33 +68,35 @@ namespace genio
 #define IParserT IParserA
 #define CM_TCHAR CM_ASCII
 #endif
-#endif
 
 	class IParser
 	{
 
 	public:
 
-		enum TOKEN_TYPE
+		typedef enum
 		{
 			TT_NONE = 0,
 
-			TT_IDENT,			// [a-z,A-Z,_]+[0-9,a-z,A-Z,_]*
-			TT_STRING,			// ["'][...]*["']
-			TT_NUMBER,			// [-][0-9]+[.][0-9]*
-			TT_SYMBOL,			// [!@#$%^&*()`~-=+[]{}<>/?;':",.|\]
-			TT_HEXNUMBER,		// [0][xX][0-9,a-f,A-F]+
-			TT_SHORTCOMMENT,	// "//"[...]*[\n]
-			TT_LONGCOMMENT,		// "/*"[...]*"*/"
+			TT_IDENT,			/// [a-z,A-Z,_]+[0-9,a-z,A-Z,_]*
+			TT_STRING,			/// ["'][...]*["']
+			TT_NUMBER,			/// [-][0-9]+[.][0-9]*
+			TT_SYMBOL,			/// [!@#$%^&*()`~-=+[]{}<>/?;':",.|\]
+			TT_HEXNUMBER,		/// [0][xX][0-9,a-f,A-F]+
+			TT_SHORTCOMMENT,	/// "//"[...]*[\n]
+			TT_LONGCOMMENT,		/// "/*"[...]*"*/"
+			TT_NEWLINE,			/// [\n\r]+
 
 			TT_NUMTOKENTYPES
-		};
+		} TOKEN_TYPE;
 
-		enum CHAR_MODE
+		typedef enum
 		{
 			CM_ASCII = 0,
 			CM_UNICODE
-		};
+		} CHAR_MODE;
+
+#define PARSEFLAG_TOKENIZE_NEWLINES		0x0001
 
 		/// Consumes the next C-style token in the stream
 		virtual bool NextToken() = NULL;
@@ -93,14 +105,23 @@ namespace genio
 		/// until a non-whitespace token is found
 		virtual bool NextLine() = NULL;
 
-		/// Captures the data in the stream until the next detected EOL but does not
-		/// move the current stream position
+		/// Captures the data in the stream until the next detected EOL
 		virtual bool ToEndOfLine() = NULL;
 
 		/// Returns the current token type that has been parsed out of the stream
 		virtual TOKEN_TYPE GetCurrentTokenType() const = NULL;
 
+		/// When the return value is true, token_start and token_end contain the indices in the buffer for the current token
+		virtual bool GetCurrentTokenRange(size_t &token_start, size_t &token_end) const = NULL;
+
+		/// Returns the resources allocated by the parser to the system
 		virtual void Release() = NULL;
+
+		/// Sets the flags that control parse operations
+		virtual void SetModeFlags(uint64_t flags) = NULL;
+
+		/// Gets the flags that control parse operations
+		virtual uint64_t GetModeFlags() = NULL;
 
 		/// Creates an IParser in the mode you desire, ASCII or Unicode. Specify CM_TCHAR to choose based on your program configuration
 		GENIO_API static IParser *Create(CHAR_MODE mode);
@@ -109,7 +130,9 @@ namespace genio
 
 	class IParserW : public IParser
 	{
+
 	public:
+
 		/// Sets the source data that will be parsed
 		virtual void SetSourceData(const wchar_t *data, size_t datalen) = NULL;
 
@@ -120,11 +143,16 @@ namespace genio
 		/// checking case
 		virtual bool IsToken(const wchar_t *s, bool case_sensitive = false) const = NULL;
 
+		/// Captures the data in the stream until the one of the characters in the delimiter_set is detected 
+		virtual bool ReadUntil(const wchar_t *delimiter_set, bool end_ok = false, bool multiline = false) = NULL;
+
 	};
 
 	class IParserA : public IParser
 	{
+
 	public:
+
 		/// Sets the source data that will be parsed
 		virtual void SetSourceData(const char *data, size_t datalen) = NULL;
 
@@ -135,7 +163,19 @@ namespace genio
 		/// checking case
 		virtual bool IsToken(const char *s, bool case_sensitive = false) const = NULL;
 
+		/// Captures the data in the stream until the one of the characters in the delimiter_set is detected 
+		virtual bool ReadUntil(const char *delimiter_set, bool end_ok = false, bool multiline = false) = NULL;
+
 	};
+
+#if defined(UNICODE)
+#define IParserT		IParserW
+#define	CM_TCHAR		CM_UNICODE
+#else
+#define IParserT		IParserA
+#define	CM_TCHAR		CM_ASCII
+#endif
+
 
 	class ITextOutput
 	{
