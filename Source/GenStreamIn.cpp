@@ -298,7 +298,7 @@ void CInputStream::ReadFloat(float &d)
 }
 
 
-void CInputStream::ReadStringA(char  *d)
+void CInputStream::ReadStringA(char *d)
 {
 	for (;;)
 	{
@@ -311,7 +311,7 @@ void CInputStream::ReadStringA(char  *d)
 }
 
 
-void CInputStream::ReadStringW(wchar_t  *d)
+void CInputStream::ReadStringW(wchar_t *d)
 {
 	for (;;)
 	{
