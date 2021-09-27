@@ -35,6 +35,12 @@
 //#include <Crc.h>
 
 
+genio::IInputStream *genio::IInputStream::Create(HANDLE h)
+{
+	return (genio::IInputStream *)(new CInputStream(h));
+}
+
+
 // ************************************************************************
 // Input Stream Methods
 
@@ -62,6 +68,12 @@ CInputStream::CInputStream(HANDLE h)
 CInputStream::~CInputStream()
 {
 	Close();
+}
+
+
+void CInputStream::Release()
+{
+	delete this;
 }
 
 
@@ -99,6 +111,15 @@ void CInputStream::Close()
 
 	m_hFile = NULL;
 	m_OwnsFile = false;
+}
+
+
+void CInputStream::Flush()
+{
+	if (!m_hFile)
+		return;
+
+	::FlushFileBuffers(m_hFile);
 }
 
 
@@ -302,7 +323,12 @@ void CInputStream::ReadStringA(char *d)
 {
 	for (;;)
 	{
-		Read((void *)d, sizeof(char));
+		if (Read((void *)d, sizeof(char)))
+		{
+			*d = '\0';
+			break;
+		}
+
 		if (!(*d))
 			break;
 
@@ -315,7 +341,12 @@ void CInputStream::ReadStringW(wchar_t *d)
 {
 	for (;;)
 	{
-		Read((void *)d, sizeof(wchar_t));
+		if (!Read((void *)d, sizeof(wchar_t)))
+		{
+			*d = L'\0';
+			break;
+		}
+
 		if (!(*d))
 			break;
 

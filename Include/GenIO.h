@@ -281,8 +281,8 @@ namespace genio
 		virtual void ReadDWORD		(DWORD		&d) = NULL;
 
 		// If you use this, store the string length in the stream and pre-allocate space
-		virtual void ReadStringA	(const char		*d) = NULL;
-		virtual void ReadStringW	(const wchar_t	*d) = NULL;
+		virtual void ReadStringA	(char		*d) = NULL;
+		virtual void ReadStringW	(wchar_t	*d) = NULL;
 
 		GENIO_API static IInputStream *Create(HANDLE h = NULL);
 

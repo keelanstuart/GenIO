@@ -50,9 +50,12 @@ public:
 	CInputStream(HANDLE h);
 	virtual ~CInputStream();
 
+	virtual void Release();
+
 	virtual bool Assign(const TCHAR *filename);
 	virtual bool Open();
 	virtual void Close();
+	virtual void Flush();
 	virtual void Seek(genio::IStream::SEEK_MODE mode, int64_t count);
 	virtual size_t Pos() const;
 
