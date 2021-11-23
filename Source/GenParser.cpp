@@ -43,7 +43,7 @@ CGenParserA::CGenParserA()
 	m_pos = 0;
 	m_start = m_end = 0;
 
-	m_curType = genio::IParser::TT_NONE;
+	m_curType = genio::IParser::TOKEN_TYPE::TT_NONE;
 
 	m_flags = 0;
 }
