@@ -265,6 +265,7 @@ namespace genio
 	public:
 
 		virtual FOURCHARCODE NextBlockId() = NULL;
+		virtual size_t NextBlockSize() = NULL;
 
 		virtual size_t Read(void *data, size_t size, size_t number = 1) = NULL;
 

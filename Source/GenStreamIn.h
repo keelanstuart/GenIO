@@ -62,6 +62,7 @@ public:
 	virtual bool CanAccess() const;
 
 	virtual genio::FOURCHARCODE NextBlockId();
+	virtual size_t NextBlockSize();
 	virtual bool BeginBlock(genio::FOURCHARCODE id);
 	virtual void EndBlock();
 

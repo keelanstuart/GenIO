@@ -191,7 +191,7 @@ bool CInputStream::CanAccess() const
 }
 
 
-UINT32 CInputStream::NextBlockId()
+uint32_t CInputStream::NextBlockId()
 {
 	if (m_hFile)
 	{
@@ -199,10 +199,28 @@ UINT32 CInputStream::NextBlockId()
 		DWORD nread = 0;
 		ReadFile(m_hFile, &tmpid, sizeof(genio::FOURCHARCODE), &nread, NULL);
 
-		// Go back the size of one UINT32...
+		// Go back the size of one uint32_t...
 		Seek(genio::IStream::SEEK_MODE::SM_CURRENT, -((int64_t)sizeof(genio::FOURCHARCODE)));
 
 		return ntohl(tmpid);
+	}
+
+	return 0;
+}
+
+
+size_t CInputStream::NextBlockSize()
+{
+	if (m_hFile)
+	{
+		SStreamBlockEntry ssbe;
+		DWORD nread = 0;
+		ReadFile(m_hFile, &ssbe, sizeof(SStreamBlockEntry), &nread, NULL);
+
+		// Go back the size of one uint32_t...
+		Seek(genio::IStream::SEEK_MODE::SM_CURRENT, -((int64_t)sizeof(SStreamBlockEntry)));
+
+		return ssbe.m_Info.m_Length;
 	}
 
 	return 0;
