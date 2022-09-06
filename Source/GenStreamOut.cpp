@@ -114,6 +114,7 @@ size_t COutputStream::Write(const void *data, size_t size, size_t number)
 		WriteFile(m_hFile, data, (DWORD)size, &nwritten, NULL);
 		ret += nwritten;
 		number--;
+		data = (const uint8_t *)data + size;
 	}
 
 	if (!m_StreamBlockStack.empty())
